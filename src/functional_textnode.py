@@ -12,43 +12,6 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
     #Empty list to store split nodes into
     new_nodes = []
 
-    '''for node in old_nodes:
-        if node.text_type != 'text':
-            new_nodes.append(node)
-            continue
-
-        text = node.text
-        temp_str = ''
-        inside_delimiter = False
-        i = 0
-        delimiter_len = len(delimiter)
-
-        while i < len(text):
-            if text[i:i+delimiter_len] == delimiter:
-                if inside_delimiter:
-                    #Closing delimiter
-                    new_nodes.append(TextNode(temp_str, text_type))
-                    temp_str = ""
-                    inside_delimiter = False
-                    i += delimiter_len - 1
-                else:
-                    #Opening delimiter
-                    if temp_str:
-                        new_nodes.append(TextNode(temp_str, 'text'))
-                    temp_str = ""
-                    inside_delimiter = True
-                    i += delimiter_len - 1
-            else:
-                temp_str += text[i]
-            i += 1
-
-            #Append any remaining text
-            if temp_str:
-                if inside_delimiter:
-                    raise ValueError("Must have matching delimiters")
-                else:
-                    new_nodes.append(TextNode(temp_str, 'text'))'''
-
     for node in old_nodes:
         if delimiter == '*':
             if '*' in node.text:
