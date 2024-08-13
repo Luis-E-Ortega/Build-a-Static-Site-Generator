@@ -106,6 +106,7 @@ class TestTextNode(unittest.TestCase):
         text_node = TextNode("", None, url="http://mystery.com", alt_text="A mystery")
         with self.assertRaises(Exception) as context:
             text_node_to_html_node(text_node)
-        self.assertEqual(str(context.exception), "Unknown TextNode type")
+        self.assertEqual(str(context.exception), "Unknown TextNode type") 
+
 if __name__ == "__main__":
     unittest.main()
