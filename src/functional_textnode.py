@@ -61,3 +61,15 @@ c_node = TextNode("This one is for code using `codeeeeee` in the strings", text_
 new_i_node = split_nodes_delimiter([i_node], "*", text_type_italic)
 new_b_node = split_nodes_delimiter([b_node], "**", text_type_bold)
 new_c_node = split_nodes_delimiter([c_node], "`", text_type_code)
+
+
+
+def extract_markdown_images(text):
+    pattern = r'!\[(.*?)\]\((.*?)\)'
+    links_image = re.findall(pattern, text)
+    return links_image
+
+def extract_markdown_links(text):
+    pattern = r"(?<!!)\[(.*?)\]\((.*?)\)"
+    links_standard = re.findall(pattern, text)
+    return links_standard
