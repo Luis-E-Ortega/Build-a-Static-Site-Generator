@@ -7,6 +7,8 @@ text_type_text='text'
 text_type_bold='bold'
 text_type_italic='italic'
 text_type_code='code'
+text_type_link='link'
+text_type_image='image'
 
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
     #Empty list to store split nodes into
@@ -54,14 +56,6 @@ def delimiter_helper(split, delimiter, text_type):
             new_nodes.append(TextNode(part, text_type_text))
     return new_nodes
 
-i_node = TextNode("This  is a text with an *italic block* of writing", text_type_text)
-b_node = TextNode("This is **boldyyyy** writing", text_type_text)
-c_node = TextNode("This one is for code using `codeeeeee` in the strings", text_type_text)
-
-new_i_node = split_nodes_delimiter([i_node], "*", text_type_italic)
-new_b_node = split_nodes_delimiter([b_node], "**", text_type_bold)
-new_c_node = split_nodes_delimiter([c_node], "`", text_type_code)
-
 
 
 def extract_markdown_images(text):
@@ -73,3 +67,46 @@ def extract_markdown_links(text):
     pattern = r"(?<!!)\[(.*?)\]\((.*?)\)"
     links_standard = re.findall(pattern, text)
     return links_standard
+
+
+def extract_markdown_converter(tuples, text_type):
+    text_node_list = []
+
+    for item in tuples:
+        if text_type == text_type_image:
+            alt_text = item[0]
+            url = item[1]
+            text_node_list.append(TextNode(alt_text, text_type_image, url))
+        elif text_type == text_type_link:
+            text = item[0]
+            url = item[1]
+            text_node_list.append(TextNode(text, text_type_link, url))
+
+    return text_node_list
+
+
+def split_nodes_image(old_nodes):
+    new_nodes = []
+
+    for node in old_nodes:
+        if node.text == '':
+            continue
+        if not extract_markdown_images(node.text):
+            new_nodes.append(node)
+        else:
+            for tuple in extract_markdown_images(node.text):
+                
+            new_nodes.append(extract_markdown_images(node.text))
+    return new_nodes
+
+def split_nodes_link(old_nodes):
+    new_nodes = []
+
+    for node in old_nodes:
+        if node.text == '':
+            continue
+        if not extract_markdown_links(node.text):
+            new_nodes.append(node)
+        else:
+            new_nodes.append(extract_markdown_links(node.text))
+    return new_nodes
