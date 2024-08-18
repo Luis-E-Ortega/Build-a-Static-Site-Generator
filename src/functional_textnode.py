@@ -89,24 +89,60 @@ def split_nodes_image(old_nodes):
     new_nodes = []
 
     for node in old_nodes:
-        if node.text == '':
+        if node.text_type != text_type_text:
+            new_nodes.append(node)
             continue
         if not extract_markdown_images(node.text):
             new_nodes.append(node)
         else:
-            for tuple in extract_markdown_images(node.text):
+            remaining_text = node.text
+            while extract_markdown_images(remaining_text):
+                tuple_holder = extract_markdown_images(remaining_text)[0]
+                full_image_markdown = f'![{tuple_holder[0]}]({tuple_holder[1]})'
+                parts = remaining_text.split(full_image_markdown, 1)
+
+                # Add text before image if it exists
+                if parts[0]:
+                    new_nodes.append(TextNode(parts[0], text_type_text))
                 
-            new_nodes.append(extract_markdown_images(node.text))
+                # Add image node
+                new_nodes.append(extract_markdown_converter(tuple_holder, text_type_image))
+
+                # Update remaining_text for next iteration
+                remaining_text = parts[1]
+            
+            # Add any remaining text after last image
+            if remaining_text:
+                new_nodes.append(TextNode(remaining_text, text_type_text))
     return new_nodes
 
 def split_nodes_link(old_nodes):
     new_nodes = []
 
     for node in old_nodes:
-        if node.text == '':
+        if node.text_type != text_type_text:
+            new_nodes.append(node)
             continue
         if not extract_markdown_links(node.text):
             new_nodes.append(node)
         else:
-            new_nodes.append(extract_markdown_links(node.text))
+            remaining_text = node.text
+            while extract_markdown_links(remaining_text):
+                tuple_holder = extract_markdown_links(remaining_text)[0]
+                full_link_markdown = f'[{tuple_holder[0]}]({tuple_holder[1]})'
+                parts = remaining_text.split(full_link_markdown, 1)
+
+                # Add text before link if it exists
+                if parts[0]:
+                    new_nodes.append(TextNode(parts[0], text_type_text))
+                
+                # Add link node
+                new_nodes.append(extract_markdown_converter(tuple_holder, text_type_link))
+
+                # Update remaining_text for next iteration
+                remaining_text = parts[1]
+            
+            # Add any remaining text after last link
+            if remaining_text:
+                new_nodes.append(TextNode(remaining_text, text_type_text))
     return new_nodes
