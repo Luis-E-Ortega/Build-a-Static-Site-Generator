@@ -76,13 +76,15 @@ def extract_markdown_converter(tuples, text_type):
         if text_type == text_type_image:
             alt_text = item[0]
             url = item[1]
-            text_node_list.append(TextNode(alt_text, text_type_image, url))
+            #text_node_list.append(TextNode(alt_text, text_type_image, url))
+            return TextNode(alt_text, text_type_image, url)
         elif text_type == text_type_link:
             text = item[0]
             url = item[1]
-            text_node_list.append(TextNode(text, text_type_link, url))
+            #text_node_list.append(TextNode(text, text_type_link, url))
+            return TextNode(text, text_type_link, url)
 
-    return text_node_list
+    #return text_node_list
 
 
 def split_nodes_image(old_nodes):
@@ -106,10 +108,10 @@ def split_nodes_image(old_nodes):
                     new_nodes.append(TextNode(parts[0], text_type_text))
                 
                 # Add image node
-                new_nodes.append(extract_markdown_converter(tuple_holder, text_type_image))
+                new_nodes.append(extract_markdown_converter([tuple_holder], text_type_image))
 
                 # Update remaining_text for next iteration
-                remaining_text = parts[1]
+                remaining_text = parts[1] if len(parts) > 1 else ""
             
             # Add any remaining text after last image
             if remaining_text:
@@ -137,10 +139,10 @@ def split_nodes_link(old_nodes):
                     new_nodes.append(TextNode(parts[0], text_type_text))
                 
                 # Add link node
-                new_nodes.append(extract_markdown_converter(tuple_holder, text_type_link))
+                new_nodes.append(extract_markdown_converter([tuple_holder], text_type_link))
 
                 # Update remaining_text for next iteration
-                remaining_text = parts[1]
+                remaining_text = parts[1] if len(parts) > 1 else ""
             
             # Add any remaining text after last link
             if remaining_text:
