@@ -15,35 +15,44 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
     new_nodes = []
 
     for node in old_nodes:
+        if isinstance(node, TextNode):
+            text = node.text
+            current_type = node.text_type
+        else:
+            #If node is not a TextNode, create a new TextNode
+            text = str(node)
+            current_type = text_type_text
+            node = TextNode(text, current_type)
         if delimiter == '*':
-            if '*' in node.text:
-                italic_split = re.split(r'(\*.*?(\*|$))', node.text)
+            if '*' in text:
+                italic_split = re.split(r'(\*.*?(\*|$))', text)
                 new_nodes.extend(delimiter_helper(italic_split, '*', text_type_italic))
             else:
-                new_nodes.extend(node.text)
+                new_nodes.append(node)
         elif delimiter == "**":
-            if '**' in node.text:
-                bold_split = re.split(r'(\*\*.*?(\*\*|$))', node.text)
+            if '**' in text:
+                bold_split = re.split(r'(\*\*.*?(\*\*|$))', text)
                 new_nodes.extend(delimiter_helper(bold_split, "**", text_type_bold))
             else:
-                new_nodes.extend(node.text)
+                new_nodes.append(node)
         elif delimiter == "`":
-            if '`' in node.text:
-                code_split = re.split(r'(\`.*?(\`|$))', node.text)
+            #if '`' in node.text:
+            if "`" in text:
+                code_split = re.split(r'(\`.*?(\`|$))', text)
                 new_nodes.extend(delimiter_helper(code_split, "`", text_type_code))
             else:
-                new_nodes.extend(node.text)
+                new_nodes.append(node)
 
     #print(new_nodes)
     return new_nodes
 
-def delimiter_helper(split, delimiter, text_type):
+def delimiter_helper(split_text, delimiter, text_type):
     new_nodes = []
 
     #Calculate the length of delimiter to extract the text inside
     delimiter_len = len(delimiter)
 
-    for part in split:
+    for part in split_text:
         if part.strip(delimiter).strip() == '':
             continue
         if part.startswith(delimiter) and part.endswith(delimiter):
@@ -148,3 +157,20 @@ def split_nodes_link(old_nodes):
             if remaining_text:
                 new_nodes.append(TextNode(remaining_text, text_type_text))
     return new_nodes
+
+
+def text_to_textnodes(text):
+    nodes = [TextNode(text, text_type_text)]
+
+    #Split for bold
+    nodes = split_nodes_delimiter(nodes, "**", text_type_bold)
+    #Split for italic
+    nodes = split_nodes_delimiter(nodes, "*", text_type_italic)
+    #Split for code
+    nodes = split_nodes_delimiter(nodes, "`", text_type_code)
+    #Split for images
+    nodes = split_nodes_image(nodes)
+    #Split for links
+    nodes = split_nodes_link(nodes)
+
+    return nodes
