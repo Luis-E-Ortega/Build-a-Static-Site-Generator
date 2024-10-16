@@ -1,6 +1,6 @@
 import unittest
 from textnode import *
-from blocks_textnode import *
+from blocks import *
 
 class TestMarkdownToBlocks(unittest.TestCase):
     def test_basic_markdown_to_blocks(self):
@@ -23,5 +23,37 @@ class TestMarkdownToBlocks(unittest.TestCase):
         input_text = "     \t  First block \n\n     Second block\t   \n\nThird block     \n"
         result = markdown_to_blocks(input_text)
         self.assertEqual(["First block", "Second block", "Third block"], result)
+
+
+class TestBlockToBlockType(unittest.TestCase):
+    def test_paragraph(self):
+        block = "This is a simple paragraph."
+        result = block_to_block_type(block)
+        self.assertEqual("paragraph", result)
+    def test_heading(self):
+        block = "# This is a heading"
+        result = block_to_block_type(block)
+        self.assertEqual("heading", result)
+    def test_heading_extra(self):
+        block = "#### This is a heading"
+        result = block_to_block_type(block)
+        self.assertEqual("heading", result)
+    def test_code(self):
+        block = "```Code check```"
+        result = block_to_block_type(block)
+        self.assertEqual('code', result)
+    def test_quote(self):
+        block = "> This is a quote"
+        result = block_to_block_type(block)
+        self.assertEqual('quote', result)
+    def test_unordered_list(self):
+        block = "* Item 1\n- Item 2\n* Item 3"
+        result = block_to_block_type(block)
+        self.assertEqual('unordered_list', result)
+    def test_ordered_list(self):
+        block = "1. First\n2. 2nd\n3. Three"
+        result = block_to_block_type(block)
+        self.assertEqual('ordered_list', result)
+
 if __name__ == '__main__':
     unittest.main()  
