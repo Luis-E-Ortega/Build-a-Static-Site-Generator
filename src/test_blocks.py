@@ -54,6 +54,22 @@ class TestBlockToBlockType(unittest.TestCase):
         block = "1. First\n2. 2nd\n3. Three"
         result = block_to_block_type(block)
         self.assertEqual('ordered_list', result)
+    def test_multi_line_quote(self):
+        block = '> This is a quote, line one\n> That continues\n> And continues'
+        result = block_to_block_type(block)
+        self.assertEqual('quote', result)
+    def test_multi_line_non_quote(self):
+        block = '> This is a quote, line one\n>That continues\n>And continues'
+        result = block_to_block_type(block)
+        self.assertEqual('paragraph', result)
+    def test_complex_ordered_list(self):
+        block = "1. First\n2. Second\n10. Tenth\n11. Eleventh"
+        result = block_to_block_type(block)
+        self.assertEqual('paragraph', result)
+    def test_ordered_list_not_starting_with_one(self):
+        block = "2. Second\n3. Third\n4. Fourth"
+        result = block_to_block_type(block)
+        self.assertEqual('paragraph', result)
 
 if __name__ == '__main__':
     unittest.main()  

@@ -29,7 +29,7 @@ def block_to_block_type(markdown_block):
             return "code"
         case _ if markdown_block.startswith(("# ", '## ', '### ', '#### ', '##### ', '###### ')):
             return 'heading'
-        case _ if all(line.strip().startswith(">") for line in lines):
+        case _ if all(line.strip().startswith("> ") for line in lines):
             return 'quote'
         case _ if all(line.strip().startswith(("* ", "- ")) for line in lines):
             return "unordered_list"
