@@ -1,6 +1,8 @@
 import re
 
 from textnode import TextNode
+from blocks import markdown_to_blocks, block_to_block_type
+from htmlnode import *
 
 #Create identifiers for each type of delimiter
 text_type_text='text'
@@ -174,3 +176,58 @@ def text_to_textnodes(text):
     nodes = split_nodes_link(nodes)
 
     return nodes
+
+
+def markdown_to_html_node(markdown):
+    blocks = markdown_to_blocks(markdown)
+    for block in blocks:
+        block_type = block_to_block_type(block)
+        match block_type:
+            case "code":
+                for text_segment in text_to_children(block):
+                    node = HTMLNode("code", text_segment)
+                
+            case "heading":
+                pass
+            case "quote":
+                pass
+            case "unordered_list":
+                pass
+            case "ordered_list":
+                pass
+            case "paragraph":
+                pass
+
+def text_to_children(block):
+    child_nodes = []
+    if "*" in block:
+        italic_split = re.split(r'(\*.*?(\*|$))', block)
+        child_nodes.extend(delimiter_helper(italic_split, '*', "italic"))
+    if "**" in block:
+        bold_split = re.split(r'(\*\*.*?(\*\*|$))', block)
+        child_nodes.extend(delimiter_helper(bold_split, "**", "bold"))
+    if "`" in block:
+        code_split = re.split(r'(\`.*?(\`|$))', text)
+        child_nodes.extend(delimiter_helper(code_split, "`", "code"))
+    
+    
+
+def delimiter_block_helper(split_text, delimiter, text_type):
+    new_nodes = []
+
+    #Calculate the length of delimiter to extract the text inside
+    delimiter_len = len(delimiter)
+
+    for part in split_text:
+        if part.strip(delimiter).strip() == '':
+            continue
+        if part.startswith(delimiter) and part.endswith(delimiter):
+            tag = "em" if text_type == "italic" else text_type
+            new_nodes.append(HTMLNode(tag, part[delimiter_len:-delimiter_len]))
+        elif part.startswith(delimiter) and not part.endswith(delimiter):
+            raise ValueError("Must have matching delimiters")
+        elif not part.startswith(delimiter) and part.endswith(delimiter):
+            raise ValueError("Must have matching delimiters")
+        else:
+            new_nodes.append(HTMLNode("span", part))
+    return new_nodes
