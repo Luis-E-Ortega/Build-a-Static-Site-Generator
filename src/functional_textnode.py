@@ -251,7 +251,7 @@ def block_to_ordered_list_node(block):
         # Strip the numbering from the start of the line
         clean_element = re.sub(r"^\d+\.\s", "", list_element)
         ordered_list_nodes.append(HTMLNode("li", [HTMLNode("text", clean_element)]))
-        
+
     return (HTMLNode("ol", children=ordered_list_nodes))
 
 def block_to_paragraph_node(block):
@@ -263,18 +263,25 @@ def text_to_children(block):
     child_nodes = []
     if "*" in block:
         italic_split = re.split(r'(\*.*?(\*|$))', block)
-        child_nodes.extend(delimiter_helper(italic_split, '*', "italic"))
+        child_nodes.extend(delimiter_block_helper(italic_split, '*', "italic"))
     if "**" in block:
         bold_split = re.split(r'(\*\*.*?(\*\*|$))', block)
-        child_nodes.extend(delimiter_helper(bold_split, "**", "bold"))
+        child_nodes.extend(delimiter_block_helper(bold_split, "**", "bold"))
     if "`" in block:
-        code_split = re.split(r'(\`.*?(\`|$))', text)
-        child_nodes.extend(delimiter_helper(code_split, "`", "code"))
+        code_split = re.split(r'(\`.*?(\`|$))', block)
+        child_nodes.extend(delimiter_block_helper(code_split, "`", "code"))
+    return child_nodes
 
 
 
 def delimiter_block_helper(split_text, delimiter, text_type):
     new_nodes = []
+    
+    tags = {
+        "italic": "em",
+        "bold": "strong",
+        "code": "code"
+    }
 
     #Calculate the length of delimiter to extract the text inside
     delimiter_len = len(delimiter)
@@ -283,7 +290,7 @@ def delimiter_block_helper(split_text, delimiter, text_type):
         if part.strip(delimiter).strip() == '':
             continue
         if part.startswith(delimiter) and part.endswith(delimiter):
-            tag = "em" if text_type == "italic" else text_type
+            tag = tags.get(text_type, text_type)
             new_nodes.append(HTMLNode(tag, part[delimiter_len:-delimiter_len]))
         elif part.startswith(delimiter) and not part.endswith(delimiter):
             raise ValueError("Must have matching delimiters")
