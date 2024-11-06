@@ -180,23 +180,84 @@ def text_to_textnodes(text):
 
 def markdown_to_html_node(markdown):
     blocks = markdown_to_blocks(markdown)
+    child_nodes = []
+    
+
     for block in blocks:
-        block_type = block_to_block_type(block)
+        block_type = block_to_block_type(block) 
+        node = None #Initializing the node to be reused for each case
         match block_type:
             case "code":
-                for text_segment in text_to_children(block):
-                    node = HTMLNode("code", text_segment)
-                
+                node = block_to_code_node(block)
             case "heading":
-                pass
+                node = block_to_heading_node(block)
             case "quote":
-                pass
+                node = block_to_quote_node(block)
             case "unordered_list":
-                pass
+                node = block_to_unordered_list_node(block)
             case "ordered_list":
-                pass
+                node = block_to_ordered_list_node(block)
             case "paragraph":
-                pass
+                node = block_to_paragraph_node(block)
+        if node:
+            child_nodes.append(node)
+    root_node = HTMLNode("div")
+    root_node.children = child_nodes
+    return root_node
+
+def block_to_code_node(block):
+    code_content = block.strip('`')
+    code_node = HTMLNode("code", [HTMLNode("text", code_content)])
+    return HTMLNode("pre", [code_node])
+
+def block_to_heading_node(block):
+    heading_level = block.count('#') # Counts how many '#' at the start
+    heading_content = block.strip("#").strip() # This removes the '#' and extra spaces
+    tag = f"h{heading_level}" # Creates correct HTML tag based on level
+    return HTMLNode(tag, [HTMLNode("text", heading_content)])
+
+def block_to_quote_node(block):
+    lines = block.split("\n")
+    quote_content = "\n".join(line.lstrip("> ").strip() for line in lines)
+    return HTMLNode("blockquote", [HTMLNode("text", quote_content)])
+
+def block_to_unordered_list_node(block):
+    li_list = []
+    unordered_list_nodes = []
+
+    line_split = block.split("\n")
+    for line in line_split:
+        if (line.startswith("* ") or line.startswith("- ")):
+            li_list.append(line)
+        else:
+            if li_list:
+                li_list[-1] += "\n" + line
+    for list_element in li_list:
+        unordered_list_nodes.append(HTMLNode("li", [HTMLNode("text", list_element)]))
+    return (HTMLNode("ul", children=unordered_list_nodes))
+
+def block_to_ordered_list_node(block):
+    li_list = []
+    ordered_list_nodes = []
+
+    line_split = block.split("\n")
+    for line in line_split:
+        if re.match(r"^\d+\.\s", line): # Checks if the line starts with "number. "
+            li_list.append(line)
+        else:
+            if li_list:
+                li_list[-1] += "\n" + line
+    for list_element in li_list:
+        # Strip the numbering from the start of the line
+        clean_element = re.sub(r"^\d+\.\s", "", list_element)
+        ordered_list_nodes.append(HTMLNode("li", [HTMLNode("text", clean_element)]))
+        
+    return (HTMLNode("ol", children=ordered_list_nodes))
+
+def block_to_paragraph_node(block):
+    paragraph_content = block.strip()
+    return HTMLNode("p", [HTMLNode("text", paragraph_content)])
+
 
 def text_to_children(block):
     child_nodes = []
@@ -209,8 +270,8 @@ def text_to_children(block):
     if "`" in block:
         code_split = re.split(r'(\`.*?(\`|$))', text)
         child_nodes.extend(delimiter_helper(code_split, "`", "code"))
-    
-    
+
+
 
 def delimiter_block_helper(split_text, delimiter, text_type):
     new_nodes = []
