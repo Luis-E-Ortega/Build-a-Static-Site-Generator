@@ -191,6 +191,7 @@ def markdown_to_html_node(markdown):
                 node = block_to_code_node(block)
             case "heading":
                 node = block_to_heading_node(block)
+                node.children = text_to_children(block)
             case "quote":
                 node = block_to_quote_node(block)
             case "unordered_list":
@@ -199,6 +200,8 @@ def markdown_to_html_node(markdown):
                 node = block_to_ordered_list_node(block)
             case "paragraph":
                 node = block_to_paragraph_node(block)
+                node.children = text_to_children(block)
+
         if node:
             child_nodes.append(node)
     root_node = HTMLNode("div")
@@ -214,12 +217,12 @@ def block_to_heading_node(block):
     heading_level = block.count('#') # Counts how many '#' at the start
     heading_content = block.strip("#").strip() # This removes the '#' and extra spaces
     tag = f"h{heading_level}" # Creates correct HTML tag based on level
-    return HTMLNode(tag, [HTMLNode("text", heading_content)])
+    return HTMLNode(tag, heading_content)
 
 def block_to_quote_node(block):
     lines = block.split("\n")
     quote_content = "\n".join(line.lstrip("> ").strip() for line in lines)
-    return HTMLNode("blockquote", [HTMLNode("text", quote_content)])
+    return HTMLNode("blockquote", quote_content)
 
 def block_to_unordered_list_node(block):
     li_list = []
@@ -250,52 +253,38 @@ def block_to_ordered_list_node(block):
     for list_element in li_list:
         # Strip the numbering from the start of the line
         clean_element = re.sub(r"^\d+\.\s", "", list_element)
-        ordered_list_nodes.append(HTMLNode("li", [HTMLNode("text", clean_element)]))
+        ordered_list_nodes.append(HTMLNode("li", clean_element))
 
     return (HTMLNode("ol", children=ordered_list_nodes))
 
 def block_to_paragraph_node(block):
     paragraph_content = block.strip()
-    return HTMLNode("p", [HTMLNode("text", paragraph_content)])
-
+    return HTMLNode("p", paragraph_content)
 
 def text_to_children(block):
-    child_nodes = []
-    if "*" in block:
-        italic_split = re.split(r'(\*.*?(\*|$))', block)
-        child_nodes.extend(delimiter_block_helper(italic_split, '*', "italic"))
-    if "**" in block:
-        bold_split = re.split(r'(\*\*.*?(\*\*|$))', block)
-        child_nodes.extend(delimiter_block_helper(bold_split, "**", "bold"))
-    if "`" in block:
-        code_split = re.split(r'(\`.*?(\`|$))', block)
-        child_nodes.extend(delimiter_block_helper(code_split, "`", "code"))
-    return child_nodes
+    complete_split = re.split(r'(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`)', block)
+    child_nodes = []   
 
-
-
-def delimiter_block_helper(split_text, delimiter, text_type):
-    new_nodes = []
-    
     tags = {
-        "italic": "em",
-        "bold": "strong",
-        "code": "code"
+        '**' : 'strong',
+        '*' : 'em',
+        "`" : 'code'
     }
 
-    #Calculate the length of delimiter to extract the text inside
-    delimiter_len = len(delimiter)
-
-    for part in split_text:
-        if part.strip(delimiter).strip() == '':
-            continue
-        if part.startswith(delimiter) and part.endswith(delimiter):
-            tag = tags.get(text_type, text_type)
-            new_nodes.append(HTMLNode(tag, part[delimiter_len:-delimiter_len]))
-        elif part.startswith(delimiter) and not part.endswith(delimiter):
-            raise ValueError("Must have matching delimiters")
-        elif not part.startswith(delimiter) and part.endswith(delimiter):
-            raise ValueError("Must have matching delimiters")
+    for part in complete_split:
+    # Identify the type of delimiter based on the start of the part
+        for delimiter in tags:
+            # Check if it starts and ends with the same delimiter
+            if part.startswith(delimiter) and part.endswith(delimiter):
+                delimiter_len = len(delimiter)
+                tag = tags[delimiter]
+                content = part[delimiter_len:-delimiter_len]
+                child_nodes.append(HTMLNode(tag, content))
+                break
         else:
-            new_nodes.append(HTMLNode("span", part))
-    return new_nodes
+            # If no delimiter, it's regular text
+            # Also check to only append if it is not an empty string
+            if part != "":
+                child_nodes.append(HTMLNode("text", part)) 
+    return child_nodes
+
