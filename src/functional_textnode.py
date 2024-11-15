@@ -262,7 +262,7 @@ def block_to_paragraph_node(block):
     return HTMLNode("p", paragraph_content)
 
 def text_to_children(block):
-    complete_split = re.split(r'(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`)', block)
+    complete_split = re.split(r'(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`|\[[^\]]+\]\([^\)]+\)|!\[[^\]]+\]\([^\)]+\))', block)
     child_nodes = []   
 
     tags = {
@@ -272,19 +272,31 @@ def text_to_children(block):
     }
 
     for part in complete_split:
-    # Identify the type of delimiter based on the start of the part
-        for delimiter in tags:
-            # Check if it starts and ends with the same delimiter
-            if part.startswith(delimiter) and part.endswith(delimiter):
-                delimiter_len = len(delimiter)
-                tag = tags[delimiter]
-                content = part[delimiter_len:-delimiter_len]
-                child_nodes.append(HTMLNode(tag, content))
-                break
+        # Handling links and images first
+        if part.startswith('[') and '](' in part:
+            link_split = part.split(']')
+            link_text = link_split[0][1:]
+            link_url = link_split[1][1:-1]
+            child_nodes.append(HTMLNode('a', link_text, {"href":link_url}))
+        elif part.startswith('![') and '](' in part:
+            image_split = part.split(']')
+            image_alt_text = image_split[0][2:]
+            image_src = image_split[1][1:-1]
+            child_nodes.append(HTMLNode('img', "", {"src": image_src, "alt": image_alt_text}))
         else:
-            # If no delimiter, it's regular text
-            # Also check to only append if it is not an empty string
-            if part != "":
-                child_nodes.append(HTMLNode("text", part)) 
+            # Identify the type of delimiter based on the start of the part
+            for delimiter in tags:
+                # Check if it starts and ends with the same delimiter
+                if part.startswith(delimiter) and part.endswith(delimiter):
+                    delimiter_len = len(delimiter)
+                    tag = tags[delimiter]
+                    content = part[delimiter_len:-delimiter_len]
+                    child_nodes.append(HTMLNode(tag, content))
+                    break
+            else:
+                # If no delimiter, it's regular text
+                # Also check to only append if it is not an empty string
+                if part != "":
+                    child_nodes.append(HTMLNode("text", part)) 
     return child_nodes
 
