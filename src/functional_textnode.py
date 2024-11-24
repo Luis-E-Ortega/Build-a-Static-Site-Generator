@@ -3,6 +3,7 @@ import re
 from textnode import TextNode
 from blocks import markdown_to_blocks, block_to_block_type
 from htmlnode import *
+from textwrap import dedent
 
 #Create identifiers for each type of delimiter
 text_type_text='text'
@@ -184,14 +185,15 @@ def markdown_to_html_node(markdown):
     
 
     for block in blocks:
+        #print(f"Block: {repr(block)}")
         block_type = block_to_block_type(block) 
+        #print(f"Type: {block_type}")
         node = None #Initializing the node to be reused for each case
         match block_type:
             case "code":
                 node = block_to_code_node(block)
             case "heading":
                 node = block_to_heading_node(block)
-                node.children = text_to_children(block)
             case "quote":
                 node = block_to_quote_node(block)
             case "unordered_list":
@@ -200,24 +202,36 @@ def markdown_to_html_node(markdown):
                 node = block_to_ordered_list_node(block)
             case "paragraph":
                 node = block_to_paragraph_node(block)
-                node.children = text_to_children(block)
 
         if node:
             child_nodes.append(node)
     root_node = HTMLNode("div")
     root_node.children = child_nodes
     return root_node
-
 def block_to_code_node(block):
-    code_content = block.strip('`')
-    code_node = HTMLNode("code", [HTMLNode("text", code_content)])
-    return HTMLNode("pre", [code_node])
+    lines = block.split("\n")
+    lines[1] = lines[1].lstrip(" ")
+    lines[-1] = lines[-1].replace("```", "")
+
+    content_lines = lines[1:]
+
+    if len(lines) == 3:
+        content = content_lines[0].strip()
+    else:
+        content = "\n".join(content_lines)
+
+    code_node = HTMLNode("code", "")
+    code_node.children = [HTMLNode("text", content)]
+    pre_node = HTMLNode("pre", "")
+    pre_node.children = [code_node]
+    return pre_node
 
 def block_to_heading_node(block):
     heading_level = block.count('#') # Counts how many '#' at the start
+    node = HTMLNode(f"h{heading_level}", "")
     heading_content = block.strip("#").strip() # This removes the '#' and extra spaces
-    tag = f"h{heading_level}" # Creates correct HTML tag based on level
-    return HTMLNode(tag, heading_content)
+    node.children = text_to_children(heading_content)
+    return node
 
 def block_to_quote_node(block):
     lines = block.split("\n")
@@ -258,10 +272,13 @@ def block_to_ordered_list_node(block):
     return (HTMLNode("ol", children=ordered_list_nodes))
 
 def block_to_paragraph_node(block):
-    paragraph_content = block.strip()
-    return HTMLNode("p", paragraph_content)
+    node = HTMLNode("p", "")
+    node.children = text_to_children(block.strip())
+    return node
 
 def text_to_children(block):
+    # Regex to split based on format
+    # In order of splits: bold, italic, code, link, image
     complete_split = re.split(r'(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`|\[[^\]]+\]\([^\)]+\)|!\[[^\]]+\]\([^\)]+\))', block)
     child_nodes = []   
 
