@@ -185,9 +185,9 @@ def markdown_to_html_node(markdown):
     
 
     for block in blocks:
-        #print(f"Block: {repr(block)}")
+        print(f"Block: {repr(block)}")
         block_type = block_to_block_type(block) 
-        #print(f"Type: {block_type}")
+        print(f"Type: {block_type}")
         node = None #Initializing the node to be reused for each case
         match block_type:
             case "code":
@@ -208,6 +208,7 @@ def markdown_to_html_node(markdown):
     root_node = HTMLNode("div")
     root_node.children = child_nodes
     return root_node
+
 def block_to_code_node(block):
     lines = block.split("\n")
     lines[1] = lines[1].lstrip(" ")
@@ -227,9 +228,11 @@ def block_to_code_node(block):
     return pre_node
 
 def block_to_heading_node(block):
-    heading_level = block.count('#') # Counts how many '#' at the start
+    heading_level = len(block) - len(block.lstrip('#'))
+    #heading_level = block.count('#') # Counts how many '#' at the start
     node = HTMLNode(f"h{heading_level}", "")
     heading_content = block.strip("#").strip() # This removes the '#' and extra spaces
+    node.value = heading_content
     node.children = text_to_children(heading_content)
     return node
 
