@@ -248,11 +248,11 @@ class TestMarkdownToHtmlNode(unittest.TestCase):
         input = """
         # The first rule is important
         Never forget that the *first* rule **matters**
-        It really matters **a lot**
+        it really matters **a lot**
         ## The second rule enriches
         How **wonderful** the *joy*
         ### The third rule confirms
-        We **need** to code this to make sure it works ```joy in life += 1```
+        We **need** to code this to make sure it works `joy in life += 1`
         """
 
         result = markdown_to_html_node(input)
@@ -266,17 +266,17 @@ class TestMarkdownToHtmlNode(unittest.TestCase):
         self.assertEqual("p", h1_para.tag)
 
         expected_h1_para_types = ["text", "em", "text", "strong", "text", "strong"]
-        expected_h1_para_values = ["Never forget that the ", "first", " rule ", "matters", "It really matters ", "a lot"]
+        expected_h1_para_values = ["Never forget that the ", "first", " rule ", "matters", " it really matters ", "a lot"]
 
         for i, child in enumerate(h1_para.children):
             self.assertEqual(expected_h1_para_types[i], child.tag)
             self.assertEqual(expected_h1_para_values[i], child.value)
         
-        h2_node = result.children[3]
+        h2_node = result.children[2]
         self.assertEqual("h2", h2_node.tag)
         self.assertEqual("The second rule enriches", h2_node.value)
 
-        h2_para = result.children[4]
+        h2_para = result.children[3]
         self.assertEqual("p", h2_para.tag)
 
         expected_h2_para_types = ["text", "strong", "text", "em"]
@@ -286,11 +286,11 @@ class TestMarkdownToHtmlNode(unittest.TestCase):
             self.assertEqual(expected_h2_para_types[i], child.tag)
             self.assertEqual(expected_h2_para_values[i], child.value)
 
-        h3_node = result.children[5]
+        h3_node = result.children[4]
         self.assertEqual("h3", h3_node.tag)
         self.assertEqual("The third rule confirms", h3_node.value)
 
-        h3_para = result.children[6]
+        h3_para = result.children[5]
         self.assertEqual("p", h3_para.tag)
 
         expected_h3_para_types = ["text", "strong", "text", "code"]
