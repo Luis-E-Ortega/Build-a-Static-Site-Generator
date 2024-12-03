@@ -46,7 +46,6 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
             else:
                 new_nodes.append(node)
 
-    #print(new_nodes)
     return new_nodes
 
 def delimiter_helper(split_text, delimiter, text_type):
@@ -185,9 +184,9 @@ def markdown_to_html_node(markdown):
     
 
     for block in blocks:
-        print(f"Block: {repr(block)}")
+        #print(f"Block: {repr(block)}")
         block_type = block_to_block_type(block) 
-        print(f"Type: {block_type}")
+        #print(f"Type: {block_type}")
         node = None #Initializing the node to be reused for each case
         match block_type:
             case "code":
@@ -238,8 +237,16 @@ def block_to_heading_node(block):
 
 def block_to_quote_node(block):
     lines = block.split("\n")
-    quote_content = "\n".join(line.lstrip("> ").strip() for line in lines)
-    return HTMLNode("blockquote", quote_content)
+    #print(f"Lines split in block_to_quote_node function: {lines}")  # Debug: Output the lines to understand the split
+    blockquote_node = HTMLNode("blockquote", "")
+    for line in lines:
+        line_content = line.lstrip("> ").strip() # Remove '>' and leading/trailing whitespace
+        if line_content: # If there's actual content, create a paragraph
+            p_node = HTMLNode("p", line_content)
+            blockquote_node.children.append(p_node)
+    #quote_content = "\n".join(line.lstrip("> ").strip() for line in lines)
+    #blockquote_node.children = [HTMLNode("p", quote_content)]
+    return blockquote_node
 
 def block_to_unordered_list_node(block):
     li_list = []

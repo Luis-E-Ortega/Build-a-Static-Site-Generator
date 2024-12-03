@@ -300,6 +300,89 @@ class TestMarkdownToHtmlNode(unittest.TestCase):
             self.assertEqual(expected_h3_para_types[i], child.tag)
             self.assertEqual(expected_h3_para_values[i], child.value)
 
+    # Section for testing quotes     
+    def test_basic_quote(self):
+        input = """
+        > This is a basic quote
+        """
+        result = markdown_to_html_node(input)
+
+        self.assertEqual("div", result.tag)
+
+        quote_node = result.children[0]
+        self.assertEqual("blockquote", quote_node.tag)
+        self.assertEqual("p", quote_node.children[0].tag)
+        self.assertEqual("This is a basic quote", quote_node.children[0].value)
+    def test_multi_line_basic_quote(self):
+        input = """
+        > The music was great and
+        > it filled the air with energy
+        """
+
+        result = markdown_to_html_node(input)
+
+        self.assertEqual("div", result.tag)
+
+        quote_node = result.children[0]
+        self.assertEqual("blockquote", quote_node.tag)
+        self.assertEqual("p", quote_node.children[0].tag)
+        self.assertEqual("The music was great and it filled the air with energy", quote_node.children[0].value)
+    def test_multiple_quotes_basic(self):
+        input = """
+        > The day was sunny but
+        > also very hot.
+
+        > How nice it would be
+        > if it were just a bit cooler.
+        """
+
+        result = markdown_to_html_node(input)
+
+        self.assertEqual("div", result.tag)
+
+        q1_node = result.children[0]
+        self.assertEqual("blockquote", q1_node.tag)
+        self.assertEqual("p", q1_node.children[0].tag)
+        self.assertEqual("The day was sunny but also very hot.", q1_node.children[0].value)
+
+        q2_node = result.children[1]
+        self.assertEqual("blockquote", q2_node.tag)
+        self.assertEqual("p", q2_node.children[0].tag)
+        self.assertEqual("How nice it would be if it were just a bit cooler.", q2_node.children[0].value)
+    def test_basic_quote_and_paragraph_mix(self):
+        input = """
+        > The arena was bustling
+
+        The number of people was too high to count
+
+        > It made everyone realize how popular the band had become
+        
+        In enters the band and begins playing
+        """
+
+        result = markdown_to_html_node(input)
+
+        self.assertEqual("div", result.tag)
+
+        q1_node = result.children[0]
+        self.assertEqual("blockquote", q1_node.tag)
+        self.assertEqual("p", q1_node.children[0].tag)
+        self.assertEqual("The arena was bustling", q1_node.children[0].value)
+
+        p1_node = result.children[1]
+        self.assertEqual("p", p1_node.tag)
+        self.assertEqual("The number of people was too high to count", p1_node.children[0].value)
+
+        q2_node = result.children[2]
+        self.assertEqual("blockquote", q2_node.tag)
+        self.assertEqual("p", q2_node.children[0].tag)
+        self.assertEqual("It made everyone realize how popular the band had become", q2_node.children[0].value)
+
+        p2_node = result.children[3]
+        self.assertEqual("p", p2_node.tag)
+        self.assertEqual("In enters the band and begins playing", p2_node.children[0].value)
+        
+    
 
 
 
