@@ -83,6 +83,44 @@ class TestMarkdownToHtmlNode(unittest.TestCase):
         for i, child in enumerate(mixed_node.children):
             self.assertEqual(expected_node_types[i], child.tag)
             self.assertEqual(expected_values[i], child.value)
+    def test_multi_line_basic_paragraph(self):
+        input = """
+        Begin testing of paragraph
+        with multiple lines
+        and extra content
+        """
+
+        result = markdown_to_html_node(input)
+
+        self.assertEqual("div", result.tag)
+
+        p_node = result.children[0]
+        self.assertEqual("p", p_node.tag)
+        self.assertEqual("Begin testing of paragraph with multiple lines and extra content", p_node.children[0].value)
+    def test_multi_basic_paragraph(self):
+        input = """
+        In paragraph one we introduce
+
+        Then in paragraph two we expand
+
+        Finally in paragraph three we complete
+        """
+
+        result = markdown_to_html_node(input)
+
+        self.assertEqual("div", result.tag)
+
+        p1_node = result.children[0]
+        self.assertEqual("p", p1_node.tag)
+        self.assertEqual("In paragraph one we introduce", p1_node.children[0].value)
+
+        p2_node = result.children[1]
+        self.assertEqual("p", p2_node.tag)
+        self.assertEqual("Then in paragraph two we expand", p2_node.children[0].value)
+
+        p3_node = result.children[2]
+        self.assertEqual("p", p3_node.tag)
+        self.assertEqual("Finally in paragraph three we complete", p3_node.children[0].value)
     
     # Section for testing code blocks
     def test_code_block_basic(self):
@@ -382,6 +420,66 @@ class TestMarkdownToHtmlNode(unittest.TestCase):
         self.assertEqual("p", p2_node.tag)
         self.assertEqual("In enters the band and begins playing", p2_node.children[0].value)
         
+    # Section for testing unordered lists
+    def test_basic_unordered_list(self):
+        input = """
+        * Fire
+        * Frost
+        * Shadow
+        * Mist
+        """
+
+        result = markdown_to_html_node(input.strip())
+
+        self.assertEqual("div", result.tag)
+
+        ul_node = result.children[0]
+        #print("UL node children count:", len(ul_node.children))  # Debug print
+        self.assertEqual("ul", ul_node.tag)
+
+        expected_texts = ["Fire", "Frost", "Shadow", "Mist"]
+
+        for i, expected_text in enumerate(expected_texts):
+            with self.subTest(i=i):
+                li_node = ul_node.children[i]
+                print("LI node found:", li_node.tag)  # Debug print
+                text_node = li_node.children[0]
+                print("Text node value:", text_node.value)  # Debug print
+                
+                self.assertEqual(expected_text, text_node.value)
+    def test_basic_multi_unordered_list(self):
+        input = """
+        * Earth
+        * Water
+
+        * Darkness
+        * Light
+        """
+
+        result = markdown_to_html_node(input.strip())
+
+        self.assertEqual("div", result.tag)
+
+        ul1_node = result.children[0]
+        self.assertEqual("ul", ul1_node.tag)
+        expected_texts = ["Earth", "Water"]
+
+        for i, expected_text in enumerate(expected_texts):
+            with self.subTest(i=i):
+                li_node = ul1_node.children[i]
+                text_node = li_node.children[0]
+                self.assertEqual(expected_text, text_node.value)
+        
+        ul2_node = result.children[1]
+        self.assertEqual("ul", ul2_node.tag)
+        expected_texts_2 = ["Darkness", "Light"]
+
+        for i, expected_text in enumerate(expected_texts_2):
+            with self.subTest(i=i):
+                li_node = ul2_node.children[i]
+                text_node = li_node.children[0]
+                self.assertEqual(expected_text, text_node.value)
+
     
 
 

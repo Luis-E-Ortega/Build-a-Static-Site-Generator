@@ -6,6 +6,7 @@ def markdown_to_blocks(markdown):
     current_block = ""
     in_code_block = False
     in_quote_block = False
+    in_ul_block = False
     current_block_type = None
 
     #print(f"Markdown: {repr(markdown)}")
@@ -43,7 +44,6 @@ def markdown_to_blocks(markdown):
             else:
                 stripped_quote = stripped_line[1:].lstrip()
                 current_block += " " + stripped_quote
-
         else: # If the line is anything other than just ``` or starting with >
             if in_code_block == True: # If we're in code block, then we want to add the code to the current code block
                 current_block += line + "\n"
@@ -69,13 +69,17 @@ def markdown_to_blocks(markdown):
                     else: # Everything else wants to add a new line to the current block
                         current_block += stripped_line + "\n"
                 else:
-                    if current_block:
-                        current_block += " " + stripped_line
+                    if current_block: 
+                        if current_block_type == "unordered_list": # Unordered lists need a new line rather than just a space for processing
+                            current_block += stripped_line + "\n"
+                        else:
+                            current_block += " " + stripped_line
                     else:
                         current_block += stripped_line 
 
     if current_block:
         blocks.append(current_block.strip())
+    print(f"Blocks: {repr(blocks)}")
     return blocks
 
 def is_ordered_list(lines):

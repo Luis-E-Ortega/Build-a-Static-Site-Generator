@@ -244,31 +244,33 @@ def block_to_quote_node(block):
         if line_content: # If there's actual content, create a paragraph
             p_node = HTMLNode("p", line_content)
             blockquote_node.children.append(p_node)
-    #quote_content = "\n".join(line.lstrip("> ").strip() for line in lines)
-    #blockquote_node.children = [HTMLNode("p", quote_content)]
     return blockquote_node
 
 def block_to_unordered_list_node(block):
     li_list = []
     unordered_list_nodes = []
+    lines = block.split("\n")
 
-    line_split = block.split("\n")
-    for line in line_split:
+    for line in lines:
         if (line.startswith("* ") or line.startswith("- ")):
-            li_list.append(line)
+            li_text = line[2:]
+            li_list.append(li_text)
         else:
             if li_list:
                 li_list[-1] += "\n" + line
     for list_element in li_list:
-        unordered_list_nodes.append(HTMLNode("li", [HTMLNode("text", list_element)]))
+        #child_node = text_to_children(list_element.strip())
+        child_node = HTMLNode("text", list_element.strip())
+        print(f"Adding to li children: {child_node}")  # Debugging line
+        unordered_list_nodes.append(HTMLNode("li", children=[child_node]))
     return (HTMLNode("ul", children=unordered_list_nodes))
 
 def block_to_ordered_list_node(block):
     li_list = []
     ordered_list_nodes = []
 
-    line_split = block.split("\n")
-    for line in line_split:
+    lines = block.split("\n")
+    for line in lines:
         if re.match(r"^\d+\.\s", line): # Checks if the line starts with "number. "
             li_list.append(line)
         else:
