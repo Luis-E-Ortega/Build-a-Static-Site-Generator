@@ -442,18 +442,21 @@ class TestMarkdownToHtmlNode(unittest.TestCase):
         for i, expected_text in enumerate(expected_texts):
             with self.subTest(i=i):
                 li_node = ul_node.children[i]
+                self.assertEqual("li", li_node.tag)
+
                 print("LI node found:", li_node.tag)  # Debug print
-                text_node = li_node.children[0]
-                print("Text node value:", text_node.value)  # Debug print
+                text_nodes = li_node.children[0]
+                text_value = text_nodes.value
+                print("Text node value:", text_nodes.value)  # Debug print
                 
-                self.assertEqual(expected_text, text_node.value)
+                self.assertEqual(expected_text, text_value)
     def test_basic_multi_unordered_list(self):
         input = """
-        * Earth
-        * Water
+        - Earth
+        - Water
 
-        * Darkness
-        * Light
+        - Darkness
+        - Light
         """
 
         result = markdown_to_html_node(input.strip())
@@ -479,8 +482,152 @@ class TestMarkdownToHtmlNode(unittest.TestCase):
                 li_node = ul2_node.children[i]
                 text_node = li_node.children[0]
                 self.assertEqual(expected_text, text_node.value)
+    def test_complex_single_list(self):
+        input = """
+        * The warrior **slams**
+        * The fighter *dodges*
+        * The mage teleports with code `teleport = True`
+        """
 
-    
+        result = markdown_to_html_node(input)
+
+        self.assertEqual("div", result.tag)
+
+        ul_node = result.children[0]
+        self.assertEqual("ul", ul_node.tag)
+
+        expected_texts = [
+            ["The warrior ", "slams"],
+            ["The fighter ", "dodges"],
+            ["The mage teleports with code ", "teleport = True"]
+        ]
+        expected_tags = [
+            ["text", "strong"],
+            ["text", "em"],
+            ["text", "code"]
+        ]
+
+        for i, (expected_text_parts, expected_tag_parts) in enumerate(zip(expected_texts, expected_tags)):
+            with self.subTest(i=i):
+                li_node = ul_node.children[i]
+                #print("Children in list: ", len(li_node.children))  # Check how many children each list item has
+                #print("How many children expected: ", len(expected_text_parts))  # What you're expecting
+                for j, (expected_text, expected_tag) in enumerate(zip(expected_text_parts, expected_tag_parts)):
+                    child_node = li_node.children[j]
+                    self.assertEqual(expected_tag, child_node.tag)
+                    self.assertEqual(expected_text, child_node.value)
+    def test_complex_multi_inline_single_list(self):
+        input = """
+        * The bard *sings* songs of **power**
+        * The witch curses `curse_spread *= num_enemies` and *hexes* every **giant** around
+        """
+
+        result = markdown_to_html_node(input)
+
+        self.assertEqual("div", result.tag)
+
+        ul_node = result.children[0]
+        self.assertEqual("ul", ul_node.tag)
+
+        expected_texts = [
+            ["The bard ", "sings", " songs of ", "power"], 
+            ["The witch curses ", "curse_spread *= num_enemies", " and ", "hexes", " every ", "giant", " around"]
+        ]
+        expected_tags = [
+            ["text", "em", "text", "strong"], 
+            ["text", "code", "text", "em", "text", "strong", "text"]
+        ]
+
+        for i, (expected_text_parts, expected_tag_parts) in enumerate(zip(expected_texts, expected_tags)):
+            with self.subTest(i=i):
+                li_node = ul_node.children[i]
+                for j, (expected_text, expected_tag) in enumerate(zip(expected_text_parts, expected_tag_parts)):
+                    child_node = li_node.children[j]
+                    self.assertEqual(expected_tag, child_node.tag)
+                    self.assertEqual(expected_text, child_node.value)
+    def test_complex_inline_and_multi_list(self):
+        input = """
+        * The warrior **slams**
+        * The fighter *dodges*
+        * The mage teleports with code `teleport = True`
+
+        * The bard *sings* songs of **power**
+        * The witch curses `curse_spread *= num_enemies` and *hexes* every **giant** around        
+        """
+
+        result = markdown_to_html_node(input)
+
+        self.assertEqual("div", result.tag)
+
+        ul1_node = result.children[0]
+        self.assertEqual("ul", ul1_node.tag)
+
+        expected_texts = [
+            ["The warrior ", "slams"],
+            ["The fighter ", "dodges"],
+            ["The mage teleports with code ", "teleport = True"]
+        ]
+        expected_tags = [
+            ["text", "strong"],
+            ["text", "em"],
+            ["text", "code"]
+        ]
+
+        for i, (expected_text_parts, expected_tag_parts) in enumerate(zip(expected_texts, expected_tags)):
+            with self.subTest(i=i):
+                li_node = ul1_node.children[i]
+                #print("Children in list: ", len(li_node.children))  # Check how many children each list item has
+                #print("How many children expected: ", len(expected_text_parts))  # What you're expecting
+                for j, (expected_text, expected_tag) in enumerate(zip(expected_text_parts, expected_tag_parts)):
+                    child_node = li_node.children[j]
+                    self.assertEqual(expected_tag, child_node.tag)
+                    self.assertEqual(expected_text, child_node.value)
+
+        ul2_node = result.children[1]
+        self.assertEqual("ul", ul2_node.tag)
+
+        expected_texts = [
+            ["The bard ", "sings", " songs of ", "power"], 
+            ["The witch curses ", "curse_spread *= num_enemies", " and ", "hexes", " every ", "giant", " around"]
+        ]
+        expected_tags = [
+            ["text", "em", "text", "strong"], 
+            ["text", "code", "text", "em", "text", "strong", "text"]
+        ]
+
+        for i, (expected_text_parts, expected_tag_parts) in enumerate(zip(expected_texts, expected_tags)):
+            with self.subTest(i=i):
+                li_node = ul2_node.children[i]
+                self.assertEqual("li", li_node.tag)
+                for j, (expected_text, expected_tag) in enumerate(zip(expected_text_parts, expected_tag_parts)):
+                    child_node = li_node.children[j]
+                    self.assertEqual(expected_tag, child_node.tag)
+                    self.assertEqual(expected_text, child_node.value)
+
+    # Section for testing ordered_lists
+    def test_basic_ordered_list(self):
+        input = """
+        1. First
+        2. Second
+        3. Third
+        20. Twentieth
+        """
+
+        result = markdown_to_html_node(input)
+        self.assertEqual("div", result.tag)
+
+        ol_node = result.children[0]
+        self.assertEqual("ol", ol_node.tag)
+
+        expected_texts = ["First", "Second", "Third", "Twentieth"]
+        expected_tags = ["text", "text", "text", "text"]
+
+        for i, (expected_text, expected_tag) in enumerate(zip(expected_texts, expected_tags)):
+            with self.subTest(i=i):
+                li_node = ol_node.children[i]
+                self.assertEqual("li", li_node.tag)
+                text_node = li_node.children[0]
+                self.assertEqual(expected_text, text_node.value)
 
 
 

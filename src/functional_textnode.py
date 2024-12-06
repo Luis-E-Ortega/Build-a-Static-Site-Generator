@@ -258,28 +258,44 @@ def block_to_unordered_list_node(block):
         else:
             if li_list:
                 li_list[-1] += "\n" + line
+
     for list_element in li_list:
-        #child_node = text_to_children(list_element.strip())
-        child_node = HTMLNode("text", list_element.strip())
-        print(f"Adding to li children: {child_node}")  # Debugging line
-        unordered_list_nodes.append(HTMLNode("li", children=[child_node]))
+        child_nodes = text_to_children(list_element.strip()) # Returns a list of nodes
+        li_node = HTMLNode("li", children=[])
+
+        # Iterate over each node in the child_nodes list
+        for node in child_nodes:
+            li_node.children.append(node)
+        print(f"Adding to li children: {child_nodes}")  # Debugging line
+        unordered_list_nodes.append(li_node)
+        #unordered_list_nodes.append(HTMLNode("li", children=[child_node]))
     return (HTMLNode("ul", children=unordered_list_nodes))
 
 def block_to_ordered_list_node(block):
     li_list = []
     ordered_list_nodes = []
-
     lines = block.split("\n")
+
     for line in lines:
         if re.match(r"^\d+\.\s", line): # Checks if the line starts with "number. "
-            li_list.append(line)
+            li_text = re.sub(r"^\d+\.\s", "", line)
+            li_list.append(li_text)
+            #li_list.append(line)
         else:
             if li_list:
                 li_list[-1] += "\n" + line
+
     for list_element in li_list:
+        child_nodes = text_to_children(list_element.strip()) # Returns a list of nodes
+        li_node = HTMLNode("li", children=[])
+
+        # Iterate over each node in the child_nodes list
+        for node in child_nodes:
+            li_node.children.append(node)
         # Strip the numbering from the start of the line
-        clean_element = re.sub(r"^\d+\.\s", "", list_element)
-        ordered_list_nodes.append(HTMLNode("li", clean_element))
+        #clean_element = re.sub(r"^\d+\.\s", "", list_element)
+        #ordered_list_nodes.append(HTMLNode("li", clean_element))
+        ordered_list_nodes.append(li_node)
 
     return (HTMLNode("ol", children=ordered_list_nodes))
 

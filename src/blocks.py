@@ -1,3 +1,4 @@
+import re
 from textnode import TextNode
 
 def markdown_to_blocks(markdown):
@@ -6,7 +7,6 @@ def markdown_to_blocks(markdown):
     current_block = ""
     in_code_block = False
     in_quote_block = False
-    in_ul_block = False
     current_block_type = None
 
     #print(f"Markdown: {repr(markdown)}")
@@ -58,7 +58,7 @@ def markdown_to_blocks(markdown):
                     in_quote_block = False
                     current_block_type = None
                 continue
-            elif stripped_line != "": # If the first statement didn't execute, we're not in a code block
+            elif stripped_line != "": # If the first statements didn't execute, we're not in a code block or blockquote
                 if new_type != current_block_type:
                     current_block_type = new_type
                     if current_block:
@@ -70,7 +70,7 @@ def markdown_to_blocks(markdown):
                         current_block += stripped_line + "\n"
                 else:
                     if current_block: 
-                        if current_block_type == "unordered_list": # Unordered lists need a new line rather than just a space for processing
+                        if current_block_type == "unordered_list" or current_block_type == "ordered_list": # Lists need a new line rather than just a space for processing
                             current_block += stripped_line + "\n"
                         else:
                             current_block += " " + stripped_line
@@ -85,11 +85,18 @@ def markdown_to_blocks(markdown):
 def is_ordered_list(lines):
     if not lines:
         return False
-    for i, line in enumerate(lines, start=1):
-        if not line.strip().startswith(f"{i}. "):
+    pattern = r"^\d+\.\s" # Matches: digit(s) + period + space
+    for line in lines:
+        if not re.match(pattern, line.strip()):
             return False
     return True
-def is_paragraph_break(line):
+def is_ordered_list_single(line):
+    if not line:
+        return False
+    pattern = r"^\d+\.\s"
+    return bool(re.match(pattern, line))
+
+'''def is_paragraph_break(line):
     stripped = line.strip()
     return (
         stripped == "" or
@@ -98,7 +105,7 @@ def is_paragraph_break(line):
         stripped.startswith("*") or
         stripped.startswith(">") or 
         stripped.startswith("```")
-    )
+    )'''
 def get_line_type(line):
     stripped = line.strip()
     if stripped == "":
@@ -121,6 +128,8 @@ def get_line_type(line):
         return "quote"
     elif stripped.startswith("```"):
         return "code"
+    elif is_ordered_list_single(stripped):
+        return "ordered_list"
     else:
         return "paragraph"
     
