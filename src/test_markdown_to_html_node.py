@@ -628,7 +628,62 @@ class TestMarkdownToHtmlNode(unittest.TestCase):
                 self.assertEqual("li", li_node.tag)
                 text_node = li_node.children[0]
                 self.assertEqual(expected_text, text_node.value)
+    def test_complex_ordered_list(self):
+        input = """
+        25. **Powerful** number laughs at *smol* number
+        1. *Tiny* number
+        12354. Complex numbers rejoice `complex = True` for all to see
 
+        5005. New block number is *sleek*
+        400. This number is not as **powerful**
+        """
+
+        result = markdown_to_html_node(input)
+        self.assertEqual("div", result.tag)
+
+        ol1_node = result.children[0]
+        self.assertEqual("ol", ol1_node.tag)
+
+        ol2_node = result.children[1]
+        self.assertEqual("ol", ol2_node.tag)
+
+        expected_texts_1 = [
+            ["Powerful", " number laughs at ", "smol", " number"],
+            ["Tiny", " number"],
+            ["Complex numbers rejoice ", "complex = True", " for all to see"]
+        ]
+        expected_tags_1 = [
+            ["strong", "text", "em", "text"],
+            ["em", "text"],
+            ["text", "code", "text"]
+        ]
+
+        for i, (expected_text_parts, expected_tag_parts) in enumerate(zip(expected_texts_1, expected_tags_1)):
+            with self.subTest(i=i):
+                li_node = ol1_node.children[i]
+                self.assertEqual("li", li_node.tag)
+                for j, (expected_text, expected_tag) in enumerate(zip(expected_text_parts, expected_tag_parts)):
+                    child_node = li_node.children[j]
+                    self.assertEqual(expected_tag, child_node.tag)
+                    self.assertEqual(expected_text, child_node.value)
+
+        expected_texts_2 = [
+            ["New block number is ", "sleek"],
+            ["This number is not as ", "powerful"]
+        ]
+        expected_tags_2 = [
+            ["text", "em"],
+            ["text", "strong"]
+        ]
+
+        for i, (expected_text_parts, expected_tag_parts) in enumerate(zip(expected_texts_2, expected_tags_2)):
+            with self.subTest(i=i):
+                li_node = ol2_node.children[i]
+                self.assertEqual("li", li_node.tag)
+                for j, (expected_text, expected_tag) in enumerate(zip(expected_text_parts, expected_tag_parts)):
+                    child_node = li_node.children[j]
+                    self.assertEqual(expected_tag, child_node.tag)
+                    self.assertEqual(expected_text, child_node.value)
 
 
 if __name__ == '__main__':
