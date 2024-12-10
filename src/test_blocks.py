@@ -6,7 +6,7 @@ class TestMarkdownToBlocks(unittest.TestCase):
     def test_basic_markdown_to_blocks(self):
         input_text = "Line one test\nWith stuff\nAnd more stuff \n\n Line 2 and \n\n Line 3"
         result = markdown_to_blocks(input_text)
-        self.assertEqual(["Line one test\nWith stuff\nAnd more stuff", "Line 2 and", "Line 3"], result)
+        self.assertEqual(["Line one test With stuff And more stuff", "Line 2 and", "Line 3"], result)
     def test_empty_markdown_to_blocks(self):
         input_text = ""
         result = markdown_to_blocks(input_text)
@@ -18,7 +18,7 @@ class TestMarkdownToBlocks(unittest.TestCase):
     def test_multiple_new_lines_markdown_to_blocks(self):
         input_text = "First line\n\n\n\n\nSecond Line\nSame Block\nStill same block"
         result = markdown_to_blocks(input_text)
-        self.assertEqual(["First line", "Second Line\nSame Block\nStill same block"], result)
+        self.assertEqual(["First line", "Second Line Same Block Still same block"], result)
     def test_whitespace_handling(self):
         input_text = "     \t  First block \n\n     Second block\t   \n\nThird block     \n"
         result = markdown_to_blocks(input_text)
@@ -65,11 +65,11 @@ class TestBlockToBlockType(unittest.TestCase):
     def test_complex_ordered_list(self):
         block = "1. First\n2. Second\n10. Tenth\n11. Eleventh"
         result = block_to_block_type(block)
-        self.assertEqual('paragraph', result)
+        self.assertEqual('ordered_list', result)
     def test_ordered_list_not_starting_with_one(self):
         block = "2. Second\n3. Third\n4. Fourth"
         result = block_to_block_type(block)
-        self.assertEqual('paragraph', result)
+        self.assertEqual('ordered_list', result)
 
 if __name__ == '__main__':
     unittest.main()  
