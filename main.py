@@ -25,7 +25,7 @@ def copy_static(src_path, dest_path):
             print(f"Copying file: {src_entry}")
             shutil.copy(src_entry, dest_entry)
         elif os.path.isdir(src_entry):
-            print(f"Copying file: {src_entry}")
+            print(f"Copying directory: {src_entry}")
             copy_static(src_entry, dest_entry)
 
 
