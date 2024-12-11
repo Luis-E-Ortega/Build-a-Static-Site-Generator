@@ -28,6 +28,18 @@ def copy_static(src_path, dest_path):
             print(f"Copying directory: {src_entry}")
             copy_static(src_entry, dest_entry)
 
+def extract_title(markdown):
+    lines = markdown.split('\n')
+
+    for line in lines:
+        stripped_line = line.strip()
+        if stripped_line.startswith("# "):
+            h1_header = stripped_line[1:]
+            stripped_header = h1_header.strip()
+            return stripped_header
+        
+    raise Exception("No title found")
+    
 
 if __name__ == "__main__":
     main()
