@@ -1,6 +1,9 @@
 import shutil
 import os
 
+from functional_textnode import markdown_to_html_node
+from htmlnode import *
+
 def main():
     copy_static("static", "public")
 
@@ -39,7 +42,37 @@ def extract_title(markdown):
             return stripped_header
         
     raise Exception("No title found")
+
+def generate_page(from_path, template_path, dest_path):
+    print(f"Generating page from {from_path} to {dest_path} using {template_path}")
+
+    # Open and read the files that paths lead to
+    with open(from_path) as markdown_file:
+        markdown_content = markdown_file.read()
     
+    with open(template_path) as template_file:
+        template_content = template_file.read()
+
+    # Convert file contents to html
+    html_nodes = markdown_to_html_node(markdown_content)
+    html_string = html_nodes.to_html()
+
+    # Get title
+    title = extract_title(markdown_content)
+
+    # Store the results of replacements for title and content placeholders
+    result = template_content.replace("{{ Title }}", title)
+    result = result.replace("{{ Content }}", html_string)
+
+    # Check to ensure directory exists
+    os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+
+    # Open in write mode and write the result
+    with open(dest_path, "w") as dest_file:
+        dest_file.write(result)
+
+
+
 
 if __name__ == "__main__":
     main()
