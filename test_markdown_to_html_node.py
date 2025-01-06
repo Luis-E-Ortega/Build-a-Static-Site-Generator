@@ -349,8 +349,13 @@ class TestMarkdownToHtmlNode(unittest.TestCase):
 
         quote_node = result.children[0]
         self.assertEqual("blockquote", quote_node.tag)
-        self.assertEqual("p", quote_node.children[0].tag)
-        self.assertEqual("This is a basic quote", quote_node.children[0].value)
+
+        p_node = quote_node.children[0]
+        self.assertEqual("p", p_node.tag)
+
+        text_node = p_node.children[0]
+        self.assertEqual("text", text_node.tag)
+        self.assertEqual("This is a basic quote", text_node.value)
     def test_multi_line_basic_quote(self):
         input = """
         > The music was great and
@@ -363,8 +368,13 @@ class TestMarkdownToHtmlNode(unittest.TestCase):
 
         quote_node = result.children[0]
         self.assertEqual("blockquote", quote_node.tag)
-        self.assertEqual("p", quote_node.children[0].tag)
-        self.assertEqual("The music was great and it filled the air with energy", quote_node.children[0].value)
+
+        p_node = quote_node.children[0]
+        self.assertEqual("p", p_node.tag)
+
+        text_node = p_node.children[0]
+        self.assertEqual("text", text_node.tag)
+        self.assertEqual("The music was great and it filled the air with energy", text_node.value)
     def test_multiple_quotes_basic(self):
         input = """
         > The day was sunny but
@@ -378,15 +388,23 @@ class TestMarkdownToHtmlNode(unittest.TestCase):
 
         self.assertEqual("div", result.tag)
 
+        # First quote
         q1_node = result.children[0]
         self.assertEqual("blockquote", q1_node.tag)
-        self.assertEqual("p", q1_node.children[0].tag)
-        self.assertEqual("The day was sunny but also very hot.", q1_node.children[0].value)
+        q1_p_node = q1_node.children[0]
+        self.assertEqual("p", q1_p_node.tag)
+        q1_text_node = q1_p_node.children[0]
+        self.assertEqual("text", q1_text_node.tag)
+        self.assertEqual("The day was sunny but also very hot.", q1_text_node.value)
 
+        # Second quote
         q2_node = result.children[1]
         self.assertEqual("blockquote", q2_node.tag)
-        self.assertEqual("p", q2_node.children[0].tag)
-        self.assertEqual("How nice it would be if it were just a bit cooler.", q2_node.children[0].value)
+        q2_p_node = q2_node.children[0]
+        self.assertEqual("p", q2_p_node.tag)
+        q2_text_node = q2_p_node.children[0]
+        self.assertEqual("text", q2_text_node.tag)
+        self.assertEqual("How nice it would be if it were just a bit cooler.", q2_text_node.value)
     def test_basic_quote_and_paragraph_mix(self):
         input = """
         > The arena was bustling
@@ -402,23 +420,37 @@ class TestMarkdownToHtmlNode(unittest.TestCase):
 
         self.assertEqual("div", result.tag)
 
+        # First quote
         q1_node = result.children[0]
         self.assertEqual("blockquote", q1_node.tag)
-        self.assertEqual("p", q1_node.children[0].tag)
-        self.assertEqual("The arena was bustling", q1_node.children[0].value)
+        q1_p_node = q1_node.children[0]
+        self.assertEqual("p", q1_p_node.tag)
+        q1_text_node = q1_p_node.children[0]
+        self.assertEqual("text", q1_text_node.tag)
+        self.assertEqual("The arena was bustling", q1_text_node.value)
 
+        # First paragraph
         p1_node = result.children[1]
         self.assertEqual("p", p1_node.tag)
-        self.assertEqual("The number of people was too high to count", p1_node.children[0].value)
+        p1_text_node = p1_node.children[0]
+        self.assertEqual("text", p1_text_node.tag)
+        self.assertEqual("The number of people was too high to count", p1_text_node.value)
 
+        # Second quote
         q2_node = result.children[2]
         self.assertEqual("blockquote", q2_node.tag)
-        self.assertEqual("p", q2_node.children[0].tag)
-        self.assertEqual("It made everyone realize how popular the band had become", q2_node.children[0].value)
+        q2_p_node = q2_node.children[0]
+        self.assertEqual("p", q2_p_node.tag)
+        q2_text_node = q2_p_node.children[0]
+        self.assertEqual("text", q2_text_node.tag)
+        self.assertEqual("It made everyone realize how popular the band had become", q2_text_node.value)
 
+        # Second paragraph
         p2_node = result.children[3]
         self.assertEqual("p", p2_node.tag)
-        self.assertEqual("In enters the band and begins playing", p2_node.children[0].value)
+        p2_text_node = p2_node.children[0]
+        self.assertEqual("text", p2_text_node.tag)
+        self.assertEqual("In enters the band and begins playing", p2_text_node.value)
         
     # Section for testing unordered lists
     def test_basic_unordered_list(self):

@@ -204,6 +204,10 @@ def markdown_to_html_node(markdown):
 
         if node:
             child_nodes.append(node)
+        # Debug check
+        for child in child_nodes:
+            if isinstance(child, str):
+                print(f"Found raw string instead of HTMLNode: {child}")
     root_node = HTMLNode("div")
     root_node.children = child_nodes
     return root_node
@@ -232,6 +236,7 @@ def block_to_heading_node(block):
     node = HTMLNode(f"h{heading_level}", "")
     heading_content = block.strip("#").strip() # This removes the '#' and extra spaces
     node.value = heading_content
+    #node.value = ""
     node.children = text_to_children(heading_content)
     return node
 
@@ -242,7 +247,8 @@ def block_to_quote_node(block):
     for line in lines:
         line_content = line.lstrip("> ").strip() # Remove '>' and leading/trailing whitespace
         if line_content: # If there's actual content, create a paragraph
-            p_node = HTMLNode("p", line_content)
+            #p_node = HTMLNode("p", value=line_content)
+            p_node = HTMLNode("p", children=text_to_children(line_content))
             blockquote_node.children.append(p_node)
     return blockquote_node
 

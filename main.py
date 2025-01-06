@@ -6,6 +6,7 @@ from htmlnode import *
 
 def main():
     copy_static("static", "public")
+    generate_page("content/index.md", "template.html", "public/index.html")
 
 
 def copy_static(src_path, dest_path):

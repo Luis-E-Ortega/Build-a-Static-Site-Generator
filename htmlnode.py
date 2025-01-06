@@ -5,7 +5,26 @@ class HTMLNode():
         self.children = children if children is not None else []
         self.props = props
     def to_html(self):
-        raise NotImplementedError
+        # Moved logic from LeafNode and ParentNode here to align with established tests
+        if self.children:
+            # Parent node behavior
+            if not self.tag:
+                raise ValueError('No tag was provided.')
+            html = f"<{self.tag}>"
+            for child in self.children:
+                html += child.to_html()
+            html += f"</{self.tag}>"
+            return html
+        else:
+            # Leaf node behavior
+            if not self.value:
+                raise ValueError('A value is required for a leaf node')
+            if not self.tag:
+                return self.value
+            props_str = self.props_to_html()
+            if props_str:
+                return f"<{self.tag} {props_str}>{self.value}</{self.tag}>"
+            return f"<{self.tag}>{self.value}</{self.tag}>"
     def props_to_html(self):
         if not self.props:
             return ""
