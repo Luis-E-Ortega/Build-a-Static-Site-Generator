@@ -246,15 +246,21 @@ class TestMarkdownToHtmlNode(unittest.TestCase):
 
         h1_node = result.children[0]
         self.assertEqual("h1", h1_node.tag)
-        self.assertEqual("Introduction", h1_node.value)
+        h1_text_node = h1_node.children[0]
+        self.assertEqual("text", h1_text_node.tag)
+        self.assertEqual("Introduction", h1_text_node.value)
 
         h2_node = result.children[1]
         self.assertEqual("h2", h2_node.tag)
-        self.assertEqual("More info", h2_node.value)
+        h2_text_node = h2_node.children[0]
+        self.assertEqual("text", h2_text_node.tag)
+        self.assertEqual("More info", h2_text_node.value)
 
         h3_node = result.children[2]
         self.assertEqual("h3", h3_node.tag)
-        self.assertEqual("Conclusion", h3_node.value)
+        h3_text_node = h3_node.children[0]
+        self.assertEqual("text", h3_text_node.tag)
+        self.assertEqual("Conclusion", h3_text_node.value)
     
     def test_basic_heading_with_content(self):
         input = """
@@ -267,21 +273,33 @@ class TestMarkdownToHtmlNode(unittest.TestCase):
         result = markdown_to_html_node(input)
         self.assertEqual("div", result.tag)
 
+        # First heading (h1)
         h1_node = result.children[0]
         self.assertEqual("h1", h1_node.tag)
-        self.assertEqual("EXTRA EXTRA, READ ALL ABOUT IT!", h1_node.value)
+        h1_text_node = h1_node.children[0]
+        self.assertEqual("text", h1_text_node.tag)
+        self.assertEqual("EXTRA EXTRA, READ ALL ABOUT IT!", h1_text_node.value)
 
+        # First paragraph
         h1_para_node = result.children[1]
         self.assertEqual("p", h1_para_node.tag)
-        self.assertEqual("Today in history - passage", h1_para_node.children[0].value)
+        para1_text_node = h1_para_node.children[0]
+        self.assertEqual("text", para1_text_node.tag)
+        self.assertEqual("Today in history - passage", para1_text_node.value)
 
+        # Second heading (h2)
         h2_node = result.children[2]
         self.assertEqual("h2", h2_node.tag)
-        self.assertEqual("Opposing news", h2_node.value)
+        h2_text_node = h2_node.children[0]
+        self.assertEqual("text", h2_text_node.tag)
+        self.assertEqual("Opposing news", h2_text_node.value)
 
+        # Second paragraph
         h2_para_node = result.children[3]
         self.assertEqual("p", h2_para_node.tag)
-        self.assertEqual("What really happened", h2_para_node.children[0].value)
+        para2_text_node = h2_para_node.children[0]
+        self.assertEqual("text", para2_text_node.tag)
+        self.assertEqual("What really happened", para2_text_node.value)
     def test_complex_heading_with_content(self):
         input = """
         # The first rule is important
@@ -298,7 +316,9 @@ class TestMarkdownToHtmlNode(unittest.TestCase):
 
         h1_node = result.children[0]
         self.assertEqual("h1", h1_node.tag)
-        self.assertEqual("The first rule is important", h1_node.value)
+        h1_text_node = h1_node.children[0]
+        self.assertEqual("text", h1_text_node.tag)
+        self.assertEqual("The first rule is important", h1_text_node.value)
 
         h1_para = result.children[1]
         self.assertEqual("p", h1_para.tag)
@@ -312,7 +332,9 @@ class TestMarkdownToHtmlNode(unittest.TestCase):
         
         h2_node = result.children[2]
         self.assertEqual("h2", h2_node.tag)
-        self.assertEqual("The second rule enriches", h2_node.value)
+        h2_text_node = h2_node.children[0]
+        self.assertEqual("text", h2_text_node.tag)
+        self.assertEqual("The second rule enriches", h2_text_node.value)
 
         h2_para = result.children[3]
         self.assertEqual("p", h2_para.tag)
@@ -326,7 +348,9 @@ class TestMarkdownToHtmlNode(unittest.TestCase):
 
         h3_node = result.children[4]
         self.assertEqual("h3", h3_node.tag)
-        self.assertEqual("The third rule confirms", h3_node.value)
+        h3_text_node = h3_node.children[0]
+        self.assertEqual("text", h3_text_node.tag)
+        self.assertEqual("The third rule confirms", h3_text_node.value)
 
         h3_para = result.children[5]
         self.assertEqual("p", h3_para.tag)

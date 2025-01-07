@@ -235,8 +235,8 @@ def block_to_heading_node(block):
     #heading_level = block.count('#') # Counts how many '#' at the start
     node = HTMLNode(f"h{heading_level}", "")
     heading_content = block.strip("#").strip() # This removes the '#' and extra spaces
-    node.value = heading_content
-    #node.value = ""
+    #node.value = heading_content
+    node.value = ""
     node.children = text_to_children(heading_content)
     return node
 
