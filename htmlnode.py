@@ -3,28 +3,30 @@ class HTMLNode():
         self.tag = tag
         self.value = value
         self.children = children if children is not None else []
+        if any(isinstance(child, str) for child in self.children):
+            print(f"Warning: String child found in HTMLNode constructor for tag: {tag}")
         self.props = props
     def to_html(self):
-        # Moved logic from LeafNode and ParentNode here to align with established tests
+        if not self.tag:
+            return self.value if self.value else ""
+        
+        props_str = self.props_to_html()
+        opening_tag = f"<{self.tag}{' ' + props_str if props_str else ''}>"
+        closing_tag = f"</{self.tag}>"
+        
         if self.children:
             # Parent node behavior
-            if not self.tag:
-                raise ValueError('No tag was provided.')
-            html = f"<{self.tag}>"
-            for child in self.children:
-                html += child.to_html()
-            html += f"</{self.tag}>"
-            return html
+            content = ""
+            for i, child in enumerate(self.children):
+                if isinstance(child, str):
+                    raise ValueError(f"Child {i} of node with tag '{self.tag}' is a string '{child}'. Expected HTMLNode object.")
+                content += child.to_html()
+            return opening_tag + content + closing_tag
         else:
             # Leaf node behavior
-            if not self.value:
-                raise ValueError('A value is required for a leaf node')
-            if not self.tag:
-                return self.value
-            props_str = self.props_to_html()
-            if props_str:
-                return f"<{self.tag} {props_str}>{self.value}</{self.tag}>"
-            return f"<{self.tag}>{self.value}</{self.tag}>"
+            if self.value is None:
+                self.value = ""
+            return opening_tag + self.value + closing_tag
     def props_to_html(self):
         if not self.props:
             return ""

@@ -236,22 +236,18 @@ def block_to_heading_node(block):
     node = HTMLNode(f"h{heading_level}", "")
     heading_content = block.strip("#").strip() # This removes the '#' and extra spaces
     #node.value = heading_content
-    node.value = ""
+    #node.value = ""
     node.children = text_to_children(heading_content)
     return node
-
 def block_to_quote_node(block):
-    lines = block.split("\n")
-    #print(f"Lines split in block_to_quote_node function: {lines}")  # Debug: Output the lines to understand the split
-    blockquote_node = HTMLNode("blockquote", "")
-    for line in lines:
-        line_content = line.lstrip("> ").strip() # Remove '>' and leading/trailing whitespace
-        if line_content: # If there's actual content, create a paragraph
-            #p_node = HTMLNode("p", value=line_content)
-            p_node = HTMLNode("p", children=text_to_children(line_content))
-            blockquote_node.children.append(p_node)
+    # Remove '>' and any leading/trailing whitespace
+    content = block.lstrip(">").strip()
+    
+    # Create blockquote node and set its children directly
+    blockquote_node = HTMLNode("blockquote")
+    blockquote_node.children = text_to_children(content)
+    
     return blockquote_node
-
 def block_to_unordered_list_node(block):
     li_list = []
     unordered_list_nodes = []
@@ -317,8 +313,8 @@ def text_to_children(block):
     child_nodes = []   
 
     tags = {
-        '**' : 'strong',
-        '*' : 'em',
+        '**' : 'b',
+        '*' : 'i',
         "`" : 'code'
     }
 
@@ -328,12 +324,12 @@ def text_to_children(block):
             link_split = part.split(']')
             link_text = link_split[0][1:]
             link_url = link_split[1][1:-1]
-            child_nodes.append(HTMLNode('a', link_text, {"href":link_url}))
+            child_nodes.append(HTMLNode('a', link_text, None, {"href":link_url}))
         elif part.startswith('![') and '](' in part:
             image_split = part.split(']')
             image_alt_text = image_split[0][2:]
             image_src = image_split[1][1:-1]
-            child_nodes.append(HTMLNode('img', "", {"src": image_src, "alt": image_alt_text}))
+            child_nodes.append(HTMLNode('img', "", None, {"src": image_src, "alt": image_alt_text}))
         else:
             # Identify the type of delimiter based on the start of the part
             for delimiter in tags:
@@ -348,6 +344,6 @@ def text_to_children(block):
                 # If no delimiter, it's regular text
                 # Also check to only append if it is not an empty string
                 if part != "":
-                    child_nodes.append(HTMLNode("text", part)) 
+                    child_nodes.append(HTMLNode(None, part)) 
     return child_nodes
 
