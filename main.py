@@ -6,7 +6,8 @@ from htmlnode import *
 
 def main():
     copy_static("static", "public")
-    generate_page("content/index.md", "template.html", "public/index.html")
+    print("About to generate page...")  # Add this line
+    generate_pages_recursive("content", "template.html", "public")
 
 
 def copy_static(src_path, dest_path):
@@ -71,6 +72,27 @@ def generate_page(from_path, template_path, dest_path):
     # Open in write mode and write the result
     with open(dest_path, "w") as dest_file:
         dest_file.write(result)
+
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+    # List of entries in path
+    entries = os.listdir(dir_path_content)
+
+    for entry in entries:
+        # Create full path by joining dir_path_content with entry name
+        entry_path = os.path.join(dir_path_content, entry)
+
+        # Check if it's a file and if it's markdown
+        if os.path.isfile(entry_path) and entry.endswith('.md'):
+            # Create corresponding html path
+            rel_path = os.path.relpath(entry_path, dir_path_content)
+            # Convert .md extensions to .html
+            html_path = os.path.splitext(rel_path)[0] + '.html'
+            dest_path = os.path.join(dest_dir_path, html_path)
+            generate_page(entry_path, template_path, dest_path)
+        elif os.path.isdir(entry_path):
+            new_dest_dir = os.path.join(dest_dir_path, entry)
+            os.makedirs(new_dest_dir, exist_ok=True)
+            generate_pages_recursive(entry_path, template_path, new_dest_dir)
 
 
 
